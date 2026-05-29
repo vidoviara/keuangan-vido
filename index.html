@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keuangan Vido">
+<meta name="theme-color" content="#1a3c2e">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>💰 Keuangan Vido</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g900:#0d2419;--g800:#1a3c2e;--g700:#2d6a4f;--g600:#40916c;--g400:#74c69d;--g200:#b7e4c7;--g100:#d8f3dc;
+  --gold:#c9a84c;--gold2:#f4d58d;--gold3:#fff8e7;
+  --red:#e63946;--red2:#ffd6d8;
+  --blue:#2563eb;--blue2:#dbeafe;
+  --purp:#7c3aed;--purp2:#ede9fe;
+  --white:#ffffff;--gray50:#f8fafc;--gray100:#f1f5f9;--gray200:#e2e8f0;
+  --gray400:#94a3b8;--gray600:#475569;--gray800:#1e293b;
+  --radius:16px;--radius-sm:10px;
+  --shadow:0 4px 24px rgba(0,0,0,0.08);--shadow-lg:0 8px 40px rgba(0,0,0,0.14);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sora',sans-serif;background:var(--gray100);color:var(--gray800);min-height:100vh;}
+
+/* NAV */
+.nav{background:var(--g800);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,0.2);}
+.nav-brand{font-size:15px;font-weight:700;color:var(--gold2);letter-spacing:-0.3px;white-space:nowrap;}
+.nav-tabs{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-tab{background:none;border:none;color:var(--g400);font-family:'Sora',sans-serif;font-size:12px;font-weight:500;padding:6px 11px;border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.nav-tab:hover{background:rgba(255,255,255,0.08);color:var(--white);}
+.nav-tab.active{background:var(--gold);color:var(--g900);font-weight:700;}
+
+/* PAGE */
+.page{display:none;padding:20px;max-width:940px;margin:0 auto;}
+.page.active{display:block;}
+
+/* SECTION TITLE */
+.stitle{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gray400);margin-bottom:10px;margin-top:24px;display:flex;align-items:center;justify-content:space-between;}
+.stitle:first-child{margin-top:0;}
+
+/* METRIC CARDS */
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+.mc{background:var(--white);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g600);}
+.mc.red::before{background:var(--red);}
+.mc.gold::before{background:var(--gold);}
+.mc.blue::before{background:var(--blue);}
+.mc.purp::before{background:var(--purp);}
+.mc-label{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gray400);margin-bottom:5px;}
+.mc-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gray800);line-height:1.2;}
+.mc-val.pos{color:var(--g700);}
+.mc-val.neg{color:var(--red);}
+
+/* TABLE */
+.twrap{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+.ttable{width:100%;border-collapse:collapse;font-size:12px;}
+.ttable th{background:var(--g800);color:var(--g200);font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;padding:11px 12px;text-align:left;}
+.ttable td{padding:10px 12px;border-bottom:1px solid var(--gray100);vertical-align:middle;}
+.ttable tr:last-child td{border-bottom:none;}
+.ttable tr:hover td{background:var(--gray50);}
+.badge{display:inline-block;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:0.3px;}
+.badge.masuk{background:var(--g100);color:var(--g700);}
+.badge.keluar{background:var(--red2);color:var(--red);}
+.aplus{color:var(--g700);font-family:'DM Mono',monospace;font-weight:500;}
+.aminus{color:var(--red);font-family:'DM Mono',monospace;font-weight:500;}
+.sval{font-family:'DM Mono',monospace;font-size:11px;color:var(--gray400);}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;}
+.pill-g{background:var(--g100);color:var(--g700);}
+.pill-gold{background:var(--gold3);color:var(--gold);}
+.pill-purp{background:var(--purp2);color:var(--purp);}
+.empty{text-align:center;padding:40px 16px;color:var(--gray400);}
+.empty .ei{font-size:32px;margin-bottom:8px;}
+.empty p{font-size:12px;}
+.btn-del{background:none;border:none;cursor:pointer;color:var(--gray300);font-size:13px;padding:2px 5px;border-radius:5px;transition:all 0.15s;}
+.btn-del:hover{background:var(--red2);color:var(--red);}
+
+/* FORM */
+.aform{background:var(--white);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;align-items:end;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gray400);}
+.fg input,.fg select{font-family:'Sora',sans-serif;font-size:12px;padding:8px 10px;border:1.5px solid var(--gray200);border-radius:var(--radius-sm);background:var(--white);color:var(--gray800);outline:none;transition:border-color 0.2s;}
+.fg input:focus,.fg select:focus{border-color:var(--g600);}
+.btn-add{background:var(--g800);color:var(--gold2);border:none;border-radius:var(--radius-sm);padding:9px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;align-self:end;}
+.btn-add:hover{background:var(--g700);}
+
+/* FILTER */
+.fbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.fbar select{font-family:'Sora',sans-serif;font-size:11px;padding:5px 9px;border:1.5px solid var(--gray200);border-radius:8px;background:var(--white);color:var(--gray800);outline:none;cursor:pointer;}
+
+/* TARGET CARDS */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;}
+.tcard{background:var(--white);border-radius:var(--radius);padding:18px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;}
+.tcard.done{border:2px solid var(--g400);}
+.done-badge{position:absolute;top:10px;right:10px;font-size:15px;}
+.tring{position:relative;width:88px;height:88px;}
+.tring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--gray200);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1);}
+.rlabel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
+.rpct{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--gray800);display:block;line-height:1;}
+.ricon{font-size:17px;display:block;margin-top:3px;}
+.tname{font-size:11px;font-weight:700;color:var(--gray800);text-align:center;line-height:1.3;}
+.tamounts{font-size:10px;color:var(--gray400);text-align:center;font-family:'DM Mono',monospace;}
+.tamounts span{color:var(--g700);font-weight:500;}
+.ttype-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.tactions{display:flex;gap:5px;margin-top:2px;}
+.bicon{background:var(--gray100);border:none;border-radius:7px;width:26px;height:26px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.bicon:hover{background:var(--gray200);}
+.bicon.danger:hover{background:var(--red2);}
+.add-tcard{background:var(--white);border-radius:var(--radius);padding:18px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:2px dashed var(--gray200);min-height:210px;transition:all 0.2s;}
+.add-tcard:hover{border-color:var(--g600);background:var(--g100);}
+.add-tcard .ai{font-size:26px;}
+.add-tcard p{font-size:11px;color:var(--gray400);font-weight:600;}
+
+/* TARGET PAGE TABS */
+.ttabs{display:flex;gap:6px;margin-bottom:14px;}
+.ttab{background:var(--gray100);border:none;border-radius:8px;padding:7px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--gray600);cursor:pointer;transition:all 0.2s;}
+.ttab.active{background:var(--g800);color:var(--gold2);}
+
+/* DASHBOARD */
+.health-wrap{background:var(--white);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.hring{position:relative;width:96px;height:96px;flex-shrink:0;}
+.hring svg{transform:rotate(-90deg);}
+.hcenter{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.hpct{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--gray800);display:block;}
+.hsub{font-size:8px;color:var(--gray400);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
+.hstats{flex:1;min-width:160px;}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--gray100);}
+.srow:last-child{border-bottom:none;}
+.srow-name{font-size:11px;color:var(--gray600);}
+.srow-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
+
+/* BAR CHART */
+.bchart{background:var(--white);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);}
+.blegend{display:flex;gap:14px;margin-bottom:12px;}
+.ldot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px;}
+.brow{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.brow:last-child{margin-bottom:0;}
+.bmonth{width:26px;font-size:9px;font-weight:700;color:var(--gray400);flex-shrink:0;}
+.btrack{flex:1;display:flex;flex-direction:column;gap:2px;}
+.bbar{height:14px;background:var(--gray100);border-radius:5px;overflow:hidden;}
+.bfill{height:100%;border-radius:5px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1);display:flex;align-items:center;padding-left:6px;}
+.bfill.masuk{background:var(--g600);}
+.bfill.keluar{background:var(--red);}
+.bamt{width:82px;display:flex;flex-direction:column;gap:2px;text-align:right;flex-shrink:0;}
+.bamt span{font-family:'DM Mono',monospace;font-size:9px;}
+
+/* MODAL */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;}
+.moverlay.open{display:flex;}
+.modal{background:var(--white);border-radius:var(--radius);padding:24px;width:100%;max-width:400px;margin:16px;box-shadow:var(--shadow-lg);}
+.modal h3{font-size:15px;font-weight:700;color:var(--g800);margin-bottom:18px;}
+.mform{display:flex;flex-direction:column;gap:12px;}
+.mform label{font-size:9px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--gray400);display:block;margin-bottom:4px;}
+.mform input,.mform select{width:100%;font-family:'Sora',sans-serif;font-size:13px;padding:9px 12px;border:1.5px solid var(--gray200);border-radius:var(--radius-sm);background:var(--white);color:var(--gray800);outline:none;transition:border-color 0.2s;}
+.mform input:focus,.mform select:focus{border-color:var(--g600);}
+.mactions{display:flex;gap:8px;margin-top:6px;}
+.btn-cancel{flex:1;background:var(--gray100);color:var(--gray600);border:none;border-radius:var(--radius-sm);padding:10px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-cancel:hover{background:var(--gray200);}
+.btn-save{flex:2;background:var(--g800);color:var(--gold2);border:none;border-radius:var(--radius-sm);padding:10px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background 0.2s;}
+.btn-save:hover{background:var(--g700);}
+
+/* INSTALL BANNER */
+#install-banner{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--g800);color:var(--gold2);padding:12px 18px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);z-index:999;align-items:center;gap:10px;font-size:12px;font-weight:600;max-width:320px;width:90%;}
+
+@media(max-width:600px){
+  .nav-brand{font-size:13px;}
+  .page{padding:14px;}
+  .aform{grid-template-columns:1fr 1fr;}
+  .mg{grid-template-columns:1fr 1fr;}
+  .mc-val{font-size:15px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">💰 Keuangan Vido</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('bisnis')">Bisnis</button>
+    <button class="nav-tab" onclick="showPage('pribadi')">Pribadi</button>
+    <button class="nav-tab" onclick="showPage('target')">Target</button>
+  </div>
+</nav>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="page-dashboard" class="page active">
+  <div class="stitle">Ringkasan Keseluruhan</div>
+  <div class="mg">
+    <div class="mc"><div class="mc-label">Total Saldo</div><div class="mc-val" id="d-saldo">Rp0</div></div>
+    <div class="mc gold"><div class="mc-label">Total Pemasukan</div><div class="mc-val pos" id="d-masuk">Rp0</div></div>
+    <div class="mc red"><div class="mc-label">Total Pengeluaran</div><div class="mc-val neg" id="d-keluar">Rp0</div></div>
+    <div class="mc"><div class="mc-label">Net Bisnis</div><div class="mc-val" id="d-nb">Rp0</div></div>
+    <div class="mc blue"><div class="mc-label">Net Pribadi</div><div class="mc-val" id="d-np">Rp0</div></div>
+  </div>
+
+  <div class="stitle">Kesehatan Keuangan</div>
+  <div class="health-wrap">
+    <div class="hring">
+      <svg width="96" height="96" viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="40"/>
+        <circle class="ring-fill" id="d-hring" cx="50" cy="50" r="40" stroke="#40916c" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+      </svg>
+      <div class="hcenter"><span class="hpct" id="d-hpct">0%</span><span class="hsub">Saving</span></div>
+    </div>
+    <div class="hstats">
+      <div class="srow"><span class="srow-name">Saving Rate</span><span class="srow-val" id="d-srate">0%</span></div>
+      <div class="srow"><span class="srow-name">Bisnis Masuk</span><span class="srow-val pos" id="d-bm">Rp0</span></div>
+      <div class="srow"><span class="srow-name">Bisnis Keluar</span><span class="srow-val neg" id="d-bk">Rp0</span></div>
+      <div class="srow"><span class="srow-name">Pribadi Masuk</span><span class="srow-val pos" id="d-pm">Rp0</span></div>
+      <div class="srow"><span class="srow-name">Pribadi Keluar</span><span class="srow-val neg" id="d-pk">Rp0</span></div>
+    </div>
+  </div>
+
+  <div class="stitle">Rekap Bulanan</div>
+  <div class="bchart">
+    <div class="blegend">
+      <span><span class="ldot" style="background:var(--g600)"></span><span style="font-size:10px;color:var(--gray600)">Pemasukan</span></span>
+      <span><span class="ldot" style="background:var(--red)"></span><span style="font-size:10px;color:var(--gray600)">Pengeluaran</span></span>
+    </div>
+    <div id="barchart"></div>
+  </div>
+
+  <div class="stitle">Progress Target Aktif</div>
+  <div id="d-targets" class="tgrid"></div>
+</div>
+
+<!-- ══════════════ BISNIS ══════════════ -->
+<div id="page-bisnis" class="page">
+  <div class="stitle">Ringkasan Bisnis</div>
+  <div class="mg">
+    <div class="mc gold"><div class="mc-label">Total Pemasukan</div><div class="mc-val pos" id="b-masuk">Rp0</div></div>
+    <div class="mc red"><div class="mc-label">Total Pengeluaran</div><div class="mc-val neg" id="b-keluar">Rp0</div></div>
+    <div class="mc"><div class="mc-label">Net Bisnis</div><div class="mc-val" id="b-net">Rp0</div></div>
+    <div class="mc"><div class="mc-label">Transaksi</div><div class="mc-val" id="b-count">0</div></div>
+  </div>
+
+  <div class="stitle">Tambah Transaksi</div>
+  <div class="aform">
+    <div class="fg"><label>Tanggal</label><input type="date" id="b-tgl"></div>
+    <div class="fg"><label>Tipe</label>
+      <select id="b-tipe">
+        <option value="Pemasukan">Pemasukan</option>
+        <option value="Pengeluaran">Pengeluaran</option>
+      </select>
+    </div>
+    <div class="fg"><label>Sumber</label>
+      <select id="b-sumber">
+        <option>Affiliate TikTok</option>
+        <option>Endorse/Sponsor</option>
+        <option>Dividen</option>
+        <option>Investasi</option>
+        <option>Rejeki/Lainnya</option>
+      </select>
+    </div>
+    <div class="fg"><label>Nominal (Rp)</label><input type="number" id="b-nominal" placeholder="0" min="0"></div>
+    <div class="fg"><label>Catatan</label><input type="text" id="b-catatan" placeholder="Opsional..."></div>
+    <button class="btn-add" onclick="addBisnis()">+ Tambah</button>
+  </div>
+
+  <div class="stitle">
+    <span>Riwayat Transaksi</span>
+    <div class="fbar">
+      <select id="b-fmon" onchange="renderBisnis()">
+        <option value="0">Semua</option>
+        <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option>
+        <option value="4">Apr</option><option value="5">Mei</option><option value="6">Jun</option>
+        <option value="7">Jul</option><option value="8">Agu</option><option value="9">Sep</option>
+        <option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
+      </select>
+    </div>
+  </div>
+  <div class="twrap">
+    <table class="ttable">
+      <thead><tr><th>#</th><th>Tanggal</th><th>Sumber</th><th>Tipe</th><th>Nominal</th><th>Saldo</th><th>Catatan</th><th></th></tr></thead>
+      <tbody id="b-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════ PRIBADI ══════════════ -->
+<div id="page-pribadi" class="page">
+  <div class="stitle">Ringkasan Pribadi</div>
+  <div class="mg">
+    <div class="mc gold"><div class="mc-label">Total Pemasukan</div><div class="mc-val pos" id="p-masuk">Rp0</div></div>
+    <div class="mc red"><div class="mc-label">Total Pengeluaran</div><div class="mc-val neg" id="p-keluar">Rp0</div></div>
+    <div class="mc"><div class="mc-label">Net Pribadi</div><div class="mc-val" id="p-net">Rp0</div></div>
+    <div class="mc"><div class="mc-label">Transaksi</div><div class="mc-val" id="p-count">0</div></div>
+  </div>
+
+  <div class="stitle">Tambah Transaksi</div>
+  <div class="aform">
+    <div class="fg"><label>Tanggal</label><input type="date" id="p-tgl"></div>
+    <div class="fg"><label>Tipe</label>
+      <select id="p-tipe">
+        <option value="Pemasukan">Pemasukan</option>
+        <option value="Pengeluaran">Pengeluaran</option>
+      </select>
+    </div>
+    <div class="fg"><label>Kategori</label>
+      <select id="p-kategori">
+        <option>Kebutuhan Pribadi</option>
+        <option>Tanggungan Keluarga</option>
+        <option>Tabungan</option>
+        <option>Investasi Pribadi</option>
+        <option>Lainnya</option>
+      </select>
+    </div>
+    <div class="fg"><label>Keterangan</label><input type="text" id="p-ket" placeholder="mis. makan siang..."></div>
+    <div class="fg"><label>Nominal (Rp)</label><input type="number" id="p-nominal" placeholder="0" min="0"></div>
+    <div class="fg"><label>Catatan</label><input type="text" id="p-catatan" placeholder="Opsional..."></div>
+    <button class="btn-add" onclick="addPribadi()">+ Tambah</button>
+  </div>
+
+  <div class="stitle">
+    <span>Riwayat Transaksi</span>
+    <div class="fbar">
+      <select id="p-fmon" onchange="renderPribadi()">
+        <option value="0">Semua</option>
+        <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option>
+        <option value="4">Apr</option><option value="5">Mei</option><option value="6">Jun</option>
+        <option value="7">Jul</option><option value="8">Agu</option><option value="9">Sep</option>
+        <option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
+      </select>
+    </div>
+  </div>
+  <div class="twrap">
+    <table class="ttable">
+      <thead><tr><th>#</th><th>Tanggal</th><th>Kategori</th><th>Tipe</th><th>Keterangan</th><th>Nominal</th><th>Saldo</th><th>Catatan</th><th></th></tr></thead>
+      <tbody id="p-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════ TARGET ══════════════ -->
+<div id="page-target" class="page">
+  <div class="ttabs">
+    <button class="ttab active" onclick="switchTarget('bisnis')">💼 Target Bisnis</button>
+    <button class="ttab" onclick="switchTarget('pribadi')">🏠 Target Pribadi</button>
+  </div>
+
+  <div id="target-bisnis-section">
+    <div class="stitle">Target Bisnis</div>
+    <div class="tgrid" id="tgrid-bisnis"></div>
+  </div>
+
+  <div id="target-pribadi-section" style="display:none">
+    <div class="stitle">Target Pribadi</div>
+    <div class="tgrid" id="tgrid-pribadi"></div>
+  </div>
+</div>
+
+<!-- MODAL: ADD TARGET -->
+<div class="moverlay" id="modal-add-target">
+  <div class="modal">
+    <h3>🎯 Tambah Target</h3>
+    <div class="mform">
+      <div><label>Nama Target</label><input type="text" id="t-nama" placeholder="mis. Beli Motor, Dana Darurat..."></div>
+      <div><label>Emoji</label><input type="text" id="t-icon" placeholder="🎯" maxlength="4" value="🎯"></div>
+      <div><label>Nominal Target (Rp)</label><input type="number" id="t-target" placeholder="0" min="0"></div>
+      <div><label>Sudah Terkumpul (Rp)</label><input type="number" id="t-terkumpul" placeholder="0" min="0" value="0"></div>
+      <div><label>Warna Ring</label>
+        <select id="t-warna">
+          <option value="#40916c">Hijau</option>
+          <option value="#c9a84c">Emas</option>
+          <option value="#2563eb">Biru</option>
+          <option value="#e63946">Merah</option>
+          <option value="#7c3aed">Ungu</option>
+          <option value="#ea580c">Oranye</option>
+        </select>
+      </div>
+      <input type="hidden" id="t-jenis" value="bisnis">
+      <div class="mactions">
+        <button class="btn-cancel" onclick="closeModal('modal-add-target')">Batal</button>
+        <button class="btn-save" onclick="saveTarget()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: UPDATE PROGRESS -->
+<div class="moverlay" id="modal-progress">
+  <div class="modal">
+    <h3>💰 Update Progress</h3>
+    <div class="mform">
+      <div><label>Target</label><input type="text" id="ep-nama" readonly style="background:var(--gray100)"></div>
+      <div><label>Terkumpul Saat Ini (Rp)</label><input type="number" id="ep-val" placeholder="0" min="0"></div>
+      <div><label>Tambah / Kurang (Rp)</label><input type="number" id="ep-delta" placeholder="0 = tidak ubah"></div>
+      <input type="hidden" id="ep-idx">
+      <input type="hidden" id="ep-jenis">
+      <div class="mactions">
+        <button class="btn-cancel" onclick="closeModal('modal-progress')">Batal</button>
+        <button class="btn-save" onclick="saveProgress()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <span>📲</span>
+  <span style="flex:1">Install ke homescreen?</span>
+  <button id="install-btn" style="background:var(--gold);color:var(--g900);border:none;border-radius:8px;padding:5px 11px;font-family:Sora,sans-serif;font-size:11px;font-weight:700;cursor:pointer">Install</button>
+  <button onclick="document.getElementById('install-banner').style.display='none'" style="background:none;border:none;color:var(--g400);cursor:pointer;font-size:15px;line-height:1">✕</button>
+</div>
+
+<script>
+// ── STORAGE
+const LS = key => { try { const v=localStorage.getItem(key); return v?JSON.parse(v):null; } catch(e){return null;} };
+const SS = (key,val) => { try { localStorage.setItem(key,JSON.stringify(val)); } catch(e){} };
+
+let DB = {
+  bisnis:  LS('vido_bisnis')  || [],
+  pribadi: LS('vido_pribadi') || [],
+  tBisnis: LS('vido_tBisnis') || [],
+  tPribadi:LS('vido_tPribadi')|| [],
+};
+
+// ── UTILS
+const rp = n => {
+  if(!n) return 'Rp0';
+  const a=Math.abs(n);
+  const s = a>=1e9?(a/1e9).toFixed(1)+'M': a>=1e6?(a/1e6).toFixed(1)+'jt': a.toLocaleString('id-ID');
+  return (n<0?'-':'')+'Rp'+s;
+};
+const fmtD = d => {
+  if(!d) return '-';
+  const [y,m,day]=d.split('-');
+  return `${day} ${['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][+m-1]}`;
+};
+const today = () => new Date().toISOString().slice(0,10);
+const getM  = d => d ? parseInt(d.split('-')[1]) : 0;
+const circ  = 2*Math.PI*40;
+
+// ── NAV
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  ['dashboard','bisnis','pribadi','target'].forEach((n,i)=>{
+    if(n===name) document.querySelectorAll('.nav-tab')[i].classList.add('active');
+  });
+  if(name==='dashboard') renderDashboard();
+  if(name==='bisnis') renderBisnis();
+  if(name==='pribadi') renderPribadi();
+  if(name==='target') renderTargets();
+}
+
+// ── BISNIS TRANSACTIONS
+function addBisnis() {
+  const tgl=document.getElementById('b-tgl').value||today();
+  const tipe=document.getElementById('b-tipe').value;
+  const sumber=document.getElementById('b-sumber').value;
+  const nominal=parseFloat(document.getElementById('b-nominal').value)||0;
+  const catatan=document.getElementById('b-catatan').value;
+  if(!nominal){alert('Nominal wajib diisi');return;}
+  DB.bisnis.push({tgl,tipe,sumber,nominal,catatan,id:Date.now()});
+  DB.bisnis.sort((a,b)=>a.tgl.localeCompare(b.tgl));
+  SS('vido_bisnis',DB.bisnis);
+  document.getElementById('b-nominal').value='';
+  document.getElementById('b-catatan').value='';
+  renderBisnis(); renderDashboard();
+}
+function delBisnis(id) {
+  if(!confirm('Hapus transaksi ini?')) return;
+  DB.bisnis=DB.bisnis.filter(d=>d.id!==id);
+  SS('vido_bisnis',DB.bisnis);
+  renderBisnis(); renderDashboard();
+}
+function renderBisnis() {
+  const fm=parseInt(document.getElementById('b-fmon').value);
+  const all=DB.bisnis;
+  const filtered=fm?all.filter(d=>getM(d.tgl)===fm):all;
+  let masuk=0,keluar=0;
+  all.forEach(d=>{ if(d.tipe==='Pemasukan')masuk+=d.nominal; else keluar+=d.nominal; });
+  const net=masuk-keluar;
+  set('b-masuk',rp(masuk)); set('b-keluar',rp(keluar));
+  setVal('b-net',rp(net),net>=0?'pos':'neg');
+  set('b-count',all.length);
+  const tb=document.getElementById('b-tbody');
+  if(!filtered.length){tb.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="ei">📭</div><p>Belum ada transaksi</p></div></td></tr>`;return;}
+  let s=0;
+  tb.innerHTML=filtered.map((d,i)=>{
+    s+=d.tipe==='Pemasukan'?d.nominal:-d.nominal;
+    return `<tr>
+      <td style="color:var(--gray400);font-size:10px">${i+1}</td>
+      <td style="font-size:11px">${fmtD(d.tgl)}</td>
+      <td><span class="pill pill-g">${d.sumber}</span></td>
+      <td><span class="badge ${d.tipe==='Pemasukan'?'masuk':'keluar'}">${d.tipe}</span></td>
+      <td class="${d.tipe==='Pemasukan'?'aplus':'aminus'}">${rp(d.nominal)}</td>
+      <td class="sval">${rp(s)}</td>
+      <td style="font-size:10px;color:var(--gray400)">${d.catatan||'-'}</td>
+      <td><button class="btn-del" onclick="delBisnis(${d.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── PRIBADI TRANSACTIONS
+function addPribadi() {
+  const tgl=document.getElementById('p-tgl').value||today();
+  const tipe=document.getElementById('p-tipe').value;
+  const kategori=document.getElementById('p-kategori').value;
+  const ket=document.getElementById('p-ket').value;
+  const nominal=parseFloat(document.getElementById('p-nominal').value)||0;
+  const catatan=document.getElementById('p-catatan').value;
+  if(!nominal){alert('Nominal wajib diisi');return;}
+  DB.pribadi.push({tgl,tipe,kategori,ket,nominal,catatan,id:Date.now()});
+  DB.pribadi.sort((a,b)=>a.tgl.localeCompare(b.tgl));
+  SS('vido_pribadi',DB.pribadi);
+  document.getElementById('p-nominal').value='';
+  document.getElementById('p-ket').value='';
+  document.getElementById('p-catatan').value='';
+  renderPribadi(); renderDashboard();
+}
+function delPribadi(id) {
+  if(!confirm('Hapus transaksi ini?')) return;
+  DB.pribadi=DB.pribadi.filter(d=>d.id!==id);
+  SS('vido_pribadi',DB.pribadi);
+  renderPribadi(); renderDashboard();
+}
+function renderPribadi() {
+  const fm=parseInt(document.getElementById('p-fmon').value);
+  const all=DB.pribadi;
+  const filtered=fm?all.filter(d=>getM(d.tgl)===fm):all;
+  let masuk=0,keluar=0;
+  all.forEach(d=>{ if(d.tipe==='Pemasukan')masuk+=d.nominal; else keluar+=d.nominal; });
+  const net=masuk-keluar;
+  set('p-masuk',rp(masuk)); set('p-keluar',rp(keluar));
+  setVal('p-net',rp(net),net>=0?'pos':'neg');
+  set('p-count',all.length);
+  const tb=document.getElementById('p-tbody');
+  if(!filtered.length){tb.innerHTML=`<tr><td colspan="9"><div class="empty"><div class="ei">📭</div><p>Belum ada transaksi</p></div></td></tr>`;return;}
+  let s=0;
+  tb.innerHTML=filtered.map((d,i)=>{
+    s+=d.tipe==='Pemasukan'?d.nominal:-d.nominal;
+    return `<tr>
+      <td style="color:var(--gray400);font-size:10px">${i+1}</td>
+      <td style="font-size:11px">${fmtD(d.tgl)}</td>
+      <td><span class="pill pill-gold">${d.kategori}</span></td>
+      <td><span class="badge ${d.tipe==='Pemasukan'?'masuk':'keluar'}">${d.tipe}</span></td>
+      <td style="font-size:11px;color:var(--gray600)">${d.ket||'-'}</td>
+      <td class="${d.tipe==='Pemasukan'?'aplus':'aminus'}">${rp(d.nominal)}</td>
+      <td class="sval">${rp(s)}</td>
+      <td style="font-size:10px;color:var(--gray400)">${d.catatan||'-'}</td>
+      <td><button class="btn-del" onclick="delPribadi(${d.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── TARGETS
+let curTargetJenis = 'bisnis';
+
+function switchTarget(jenis) {
+  curTargetJenis = jenis;
+  document.querySelectorAll('.ttab').forEach((t,i)=>{
+    t.classList.toggle('active', (i===0&&jenis==='bisnis')||(i===1&&jenis==='pribadi'));
+  });
+  document.getElementById('target-bisnis-section').style.display = jenis==='bisnis'?'block':'none';
+  document.getElementById('target-pribadi-section').style.display = jenis==='pribadi'?'block':'none';
+  renderTargets();
+}
+
+function openAddTarget(jenis) {
+  curTargetJenis = jenis;
+  document.getElementById('t-jenis').value = jenis;
+  document.getElementById('modal-add-target').classList.add('open');
+  document.getElementById('t-nama').focus();
+}
+function saveTarget() {
+  const nama=document.getElementById('t-nama').value.trim();
+  const icon=document.getElementById('t-icon').value||'🎯';
+  const target=parseFloat(document.getElementById('t-target').value)||0;
+  const terkumpul=parseFloat(document.getElementById('t-terkumpul').value)||0;
+  const warna=document.getElementById('t-warna').value;
+  const jenis=document.getElementById('t-jenis').value;
+  if(!nama||!target){alert('Nama dan target wajib diisi');return;}
+  const key = jenis==='bisnis'?'tBisnis':'tPribadi';
+  DB[key].push({nama,icon,target,terkumpul,warna,jenis,id:Date.now()});
+  SS('vido_'+key, DB[key]);
+  closeModal('modal-add-target');
+  ['t-nama','t-target'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('t-icon').value='🎯';
+  document.getElementById('t-terkumpul').value='0';
+  renderTargets(); renderDashboard();
+}
+function openProgress(idx, jenis) {
+  const arr = jenis==='bisnis'?DB.tBisnis:DB.tPribadi;
+  const t=arr[idx];
+  document.getElementById('ep-nama').value=t.nama;
+  document.getElementById('ep-val').value=t.terkumpul;
+  document.getElementById('ep-delta').value='';
+  document.getElementById('ep-idx').value=idx;
+  document.getElementById('ep-jenis').value=jenis;
+  document.getElementById('modal-progress').classList.add('open');
+  document.getElementById('ep-val').focus();
+}
+function saveProgress() {
+  const idx=parseInt(document.getElementById('ep-idx').value);
+  const jenis=document.getElementById('ep-jenis').value;
+  const val=parseFloat(document.getElementById('ep-val').value)||0;
+  const delta=parseFloat(document.getElementById('ep-delta').value)||0;
+  const key=jenis==='bisnis'?'tBisnis':'tPribadi';
+  DB[key][idx].terkumpul = delta ? DB[key][idx].terkumpul + delta : val;
+  if(DB[key][idx].terkumpul < 0) DB[key][idx].terkumpul=0;
+  SS('vido_'+key, DB[key]);
+  closeModal('modal-progress');
+  renderTargets(); renderDashboard();
+}
+function delTarget(id, jenis) {
+  if(!confirm('Hapus target ini?')) return;
+  const key=jenis==='bisnis'?'tBisnis':'tPribadi';
+  DB[key]=DB[key].filter(t=>t.id!==id);
+  SS('vido_'+key, DB[key]);
+  renderTargets(); renderDashboard();
+}
+
+function renderTargetGrid(arr, jenis, gridId) {
+  const grid=document.getElementById(gridId);
+  const pillCls = jenis==='bisnis'?'pill-g':'pill-gold';
+  const pillLabel = jenis==='bisnis'?'Bisnis':'Pribadi';
+  let html = arr.map((t,i)=>{
+    const pct=Math.min(100,t.target>0?Math.round((t.terkumpul/t.target)*100):0);
+    const off=circ-(pct/100)*circ;
+    const done=pct>=100;
+    return `<div class="tcard${done?' done':''}">
+      ${done?'<div class="done-badge">✅</div>':''}
+      <div class="tring">
+        <svg width="88" height="88" viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="40"/>
+          <circle class="ring-fill" cx="50" cy="50" r="40" stroke="${t.warna}" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+        </svg>
+        <div class="rlabel"><span class="rpct">${pct}%</span><span class="ricon">${t.icon}</span></div>
+      </div>
+      <div class="tname">${t.nama}</div>
+      <div class="tamounts"><span>${rp(t.terkumpul)}</span> / ${rp(t.target)}</div>
+      <div class="tactions">
+        <button class="bicon" onclick="openProgress(${i},'${jenis}')" title="Update">✏️</button>
+        <button class="bicon danger" onclick="delTarget(${t.id},'${jenis}')" title="Hapus">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+  html += `<div class="add-tcard" onclick="openAddTarget('${jenis}')">
+    <div class="ai">＋</div><p>Target ${jenis==='bisnis'?'Bisnis':'Pribadi'} Baru</p>
+  </div>`;
+  grid.innerHTML = html;
+}
+
+function renderTargets() {
+  renderTargetGrid(DB.tBisnis, 'bisnis', 'tgrid-bisnis');
+  renderTargetGrid(DB.tPribadi, 'pribadi', 'tgrid-pribadi');
+}
+
+// ── DASHBOARD
+function renderDashboard() {
+  let bM=0,bK=0,pM=0,pK=0;
+  DB.bisnis.forEach(d=>{ if(d.tipe==='Pemasukan')bM+=d.nominal; else bK+=d.nominal; });
+  DB.pribadi.forEach(d=>{ if(d.tipe==='Pemasukan')pM+=d.nominal; else pK+=d.nominal; });
+  const tM=bM+pM, tK=bK+pK, saldo=tM-tK, netB=bM-bK, netP=pM-pK;
+  const sr=tM>0?Math.round((saldo/tM)*100):0;
+  const health=Math.min(100,Math.max(0,sr));
+
+  setVal('d-saldo',rp(saldo),saldo>=0?'pos':'neg');
+  set('d-masuk',rp(tM)); set('d-keluar',rp(tK));
+  setVal('d-nb',rp(netB),netB>=0?'pos':'neg');
+  setVal('d-np',rp(netP),netP>=0?'pos':'neg');
+  set('d-bm',rp(bM)); set('d-bk',rp(bK));
+  set('d-pm',rp(pM)); set('d-pk',rp(pK));
+  set('d-srate',sr+'%'); set('d-hpct',health+'%');
+
+  const ring=document.getElementById('d-hring');
+  ring.style.strokeDashoffset = (circ-(health/100)*circ).toFixed(1);
+  ring.style.stroke = health>=60?'#40916c':health>=30?'#c9a84c':'#e63946';
+
+  // Bar chart
+  const months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const byM=months.map((_,i)=>{
+    const mn=i+1; let mi=0,mk=0;
+    [...DB.bisnis,...DB.pribadi].forEach(d=>{
+      if(getM(d.tgl)!==mn)return;
+      if(d.tipe==='Pemasukan')mi+=d.nominal; else mk+=d.nominal;
+    });
+    return {m:months[i],mi,mk};
+  });
+  const maxV=Math.max(...byM.flatMap(b=>[b.mi,b.mk]),1);
+  document.getElementById('barchart').innerHTML=byM.map(b=>`
+    <div class="brow">
+      <div class="bmonth">${b.m}</div>
+      <div class="btrack">
+        <div class="bbar"><div class="bfill masuk" style="width:${Math.round(b.mi/maxV*100)}%"></div></div>
+        <div class="bbar"><div class="bfill keluar" style="width:${Math.round(b.mk/maxV*100)}%"></div></div>
+      </div>
+      <div class="bamt">
+        <span style="color:var(--g700)">${b.mi?rp(b.mi):'–'}</span>
+        <span style="color:var(--red)">${b.mk?rp(b.mk):'–'}</span>
+      </div>
+    </div>`).join('');
+
+  // Dashboard target preview — gabung bisnis + pribadi, max 4
+  const allT=[...DB.tBisnis,...DB.tPribadi].filter(t=>t.terkumpul<t.target).slice(0,4);
+  const dg=document.getElementById('d-targets');
+  if(!allT.length){
+    dg.innerHTML=`<div style="color:var(--gray400);font-size:12px;padding:12px 0">Belum ada target aktif — tambah di halaman Target.</div>`;
+    return;
+  }
+  dg.innerHTML=allT.map(t=>{
+    const pct=Math.min(100,t.target>0?Math.round((t.terkumpul/t.target)*100):0);
+    const off=circ-(pct/100)*circ;
+    return `<div class="tcard">
+      <div class="tring">
+        <svg width="88" height="88" viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="40"/>
+          <circle class="ring-fill" cx="50" cy="50" r="40" stroke="${t.warna}" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+        </svg>
+        <div class="rlabel"><span class="rpct">${pct}%</span><span class="ricon">${t.icon}</span></div>
+      </div>
+      <div class="tname">${t.nama}</div>
+      <div class="tamounts"><span>${rp(t.terkumpul)}</span> / ${rp(t.target)}</div>
+      <span class="pill ${t.jenis==='bisnis'?'pill-g':'pill-gold'}" style="font-size:9px">${t.jenis==='bisnis'?'Bisnis':'Pribadi'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── HELPERS
+function set(id,val){const e=document.getElementById(id);if(e)e.textContent=val;}
+function setVal(id,val,cls){const e=document.getElementById(id);if(e){e.textContent=val;if(cls)e.className='mc-val '+cls;}}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ── INIT
+document.getElementById('b-tgl').value=today();
+document.getElementById('p-tgl').value=today();
+renderDashboard(); renderBisnis(); renderPribadi(); renderTargets();
+
+// Close modals on overlay click
+['modal-add-target','modal-progress'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeModal(id);});
+});
+
+// PWA install
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+}
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('install-banner').style.display='flex';
+});
+document.getElementById('install-btn').addEventListener('click',async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  document.getElementById('install-banner').style.display='none';
+});
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('install-banner').style.display='none';
+});
+</script>
+</body>
+</html>
